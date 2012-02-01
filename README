@@ -1,5 +1,5 @@
 #############################################################################
-# Rbitcoinica v 0.1
+# Rbitcoinica v 0.2
 #############################################################################
 # Dislcaimer:  Use at your own risk.  We make no gaurantees that this will work.  Please
 # be advised that bitcoin is highly volitile and you can lose money.
@@ -22,6 +22,9 @@
 #
 # Version Changes:
 # v.0.1 - just mimic the Bitcoinica API with R functions
+# v.0.2 - Minor bug fixes
+          Added a function to delete an existing order
+          
 ###############################################################################
 #
 # To run first download and/or load the 3 required R packages.  You can do this by typing
