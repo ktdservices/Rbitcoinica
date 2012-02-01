@@ -1,5 +1,5 @@
 #############################################################################
-# Rbitcoinica v 0.1
+# Rbitcoinica v 0.2
 #############################################################################
 # Dislcaimer:  Use at your own risk.  We make no gaurantees that this will work.  Please
 # be advised that bitcoin is highly volitile and you can lose money.
@@ -37,15 +37,15 @@
 # All URL requests and sends are done through HTTPS so it should be secure
 # but use at your own risk.  Read the EULA at the top.
 
-> username = "myusername"
-> password = "mypassword"
+ username1 = "myusername"
+ password1 = "mypassword"
 
 ######################
 # Authentication
 ######################
 # this allows you to access restricted areas.
 
-    auth = function ( username=username, password =password ) {
+    auth = function ( username=username1, password = password1 ) {
         colon = ":"
         userpass = paste(username,colon,password,sep="")
         return (userpass)
@@ -62,10 +62,9 @@
         url2 = "quotes/"
         url4 = sprintf("%s%s%s", url1, url2, pair)
         y = fromJSON(getURI( url4, userpwd=x) )
-        t = as.POSIXlt(Sys.time(),tz="GMT", origin="1970-01-01")  
         y = as.data.frame(y)
-        y$Time = t
         y$spread = y$selling - y$buying
+        y$Time = as.POSIXlt(Sys.time(),tz="GMT",orgin="1970-01-01")
         return(y)
         }
 
@@ -163,7 +162,6 @@
         # do as.POSIXlt with %z
         y$UpdateTime <- as.POSIXlt(y$UpdateTime, format="%Y-%m-%dT%H:%M:%S%z", 
                      origin="1970-01-01",tz="GMT")
-        y = y[order(y$Time), ]
         return(y)
         }
 
@@ -226,7 +224,7 @@
 
 
 ########################
-# Place Orders ----- STILL UNDER DEVELOPMENT
+# Place Orders -----
 ########################
 
     orders.place = function ( pair="BTCUSD", type, price, amount) {
@@ -240,33 +238,54 @@
 
         y = postForm(url4, pair=pair, type=type, price=price, 
         amount=amount, .opts = list(userpwd = x))
-        
+        y = as.data.frame(y)
+        return(y)
         }
 
 
 ########################
-# CANCEL ORDERS ---- UNDER DEVELOPMENT
+# Place Market Order
 ########################
 
-        orders.cancel ( orderID ) {
+    orders.place.market = function ( pair="BTCUSD", type="MARKET", amount) {
 
         x = auth ( )
 
         url1 = "https://www.bitcoinica.com/api/"
+        url2 = "orders"
+        url3 = ".json"
+        url4 = sprintf("%s%s%s", url1, url2, url3)
+
+        y = postForm(url4, pair=pair, type=type, 
+        amount=amount, .opts = list(userpwd = x))
+        y = as.data.frame(y)
+        return(y)
+        }
+
+
+########################
+# CANCEL ORDERS ----
+########################
+
+        orders.cancel = function (  ) {
+
+        x = auth ( )
+        orders = orders.all ( n=1 )
+        orderID = orders$ID
+        url1 = "https://www.bitcoinica.com/api/"
         url2 = "orders/"
         url3 = ".json"
         url4 = sprintf("%s%s%d%s", url1, url2, orderID, url3)
-
-        postForm(url4, _method="DELETE", .opts = list(userpwd = x))
-
-        postForm(url4, pair=pair, type=type, price=price, amount=amount, .opts = list(userpwd = x))
+        #httpDELETE(url4,userpwd=x) doesnt seem to work
+        curlPerform(url = url4, customrequest = "DELETE",
+                  userpwd = x) 
         }
-
+         
 ########################
 # GET POSITIONS
 ########################
 
-    position.all ( n=100) {
+    position.all = function ( n=100) {
 
         x = auth ( )
 
@@ -284,7 +303,6 @@
         return(y)
         }
     
-
 ########################
 # ACTIVE POSITIONS  ----- UNDER DEVELOPMENT
 ########################
@@ -312,15 +330,17 @@
 # ACCOUNT INFORMATION
 ########################
 
-    account.info = function {
+    account.info = function( ) {
 
         x = auth ( ) 
 
         url1 = "https://www.bitcoinica.com/api/"
         url2 = "account.json"
         url3 = sprintf("%s%s", url1, url2 )
+        y = fromJSON(getURI(url3, userpwd=x) )
         y = as.data.frame(y)
-
+        return (y)
+    }
 
 ########################
 # LIQUIDATE
